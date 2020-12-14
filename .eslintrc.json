@@ -14,6 +14,7 @@
     "semi": "off",
     "comma-dangle": "off",
     "space-before-function-paren": "off",
-    "max-len": [2, { "code": 100, "ignoreUrls": true }]
+    "max-len": [2, { "code": 100, "ignoreUrls": true }],
+    "camelcase": "off"
   }
 }

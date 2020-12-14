@@ -22,7 +22,11 @@ export class AuthModel implements IModel {
     ];
   }
 
-  static getValidators(): Schema {
+  getName() {
+    return 'auth';
+  }
+
+  static getGoogleAuthValidators(): Schema {
     return {
       code: {
         in: ['body'],

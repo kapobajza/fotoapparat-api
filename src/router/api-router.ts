@@ -1,5 +1,5 @@
 import { Express } from 'express';
-import _ from 'lodash';
+import { padStart } from 'lodash';
 import passport from 'passport';
 
 import Config from '../config';
@@ -112,7 +112,7 @@ export default class ApiRouter {
   logRoutes(routes: LogRouteType[]) {
     routes.forEach((r) => {
       console.log(
-        `${this.getHttpMethodColor(r.method)}${_.padStart(r.method.toUpperCase(), 10)}  \x1b[32m${
+        `${this.getHttpMethodColor(r.method)}${padStart(r.method.toUpperCase(), 10)}  \x1b[32m${
           r.path
         }\x1b[0m`
       );
