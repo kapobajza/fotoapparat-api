@@ -1,4 +1,7 @@
 import jsonwebtoken from 'jsonwebtoken';
+import moment from 'moment';
+
+import Config from '../../config';
 
 export interface TokenType {
   iss: string;
@@ -15,6 +18,12 @@ export interface TokenType {
   locale: string;
   iat: number;
   exp: number;
+  id: number;
+  google_auth_token: string;
+}
+
+export interface TokenPayloadType {
+  id: number;
 }
 
 export function decode(
@@ -23,4 +32,15 @@ export function decode(
 ) {
   const t = jsonwebtoken.decode(token ?? '', options) as TokenType;
   return t;
+}
+
+export function sign(payload: TokenPayloadType) {
+  return jsonwebtoken.sign(
+    {
+      ...payload,
+      iat: moment().unix(),
+      exp: moment().add(1, 'hour').unix(),
+    },
+    Config.TOKEN_SECRET
+  );
 }

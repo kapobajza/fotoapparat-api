@@ -3,6 +3,9 @@ import morgan from 'morgan';
 import { Strategy, ExtractJwt, StrategyOptions } from 'passport-jwt';
 import passport from 'passport';
 import bodyParser from 'body-parser';
+import session from 'express-session';
+import createRedisStore from 'connect-redis';
+import redis from 'redis';
 
 import Config from './config';
 import { ApiRouter } from './router';
@@ -29,6 +32,25 @@ export default class Server {
   setupExpressApp() {
     this.app.disable('x-powered-by');
     this.app.set('port', Config.PORT);
+
+    // Prepare Redis store for session
+    const RedisStore = createRedisStore(session);
+    const redisClient = redis.createClient();
+
+    // Set up session using Redis as store
+    this.app.use(
+      session({
+        secret: Config.SESSION_SECRET,
+        saveUninitialized: false,
+        resave: false,
+        store: new RedisStore({
+          host: Config.REDIS_HOST,
+          port: Config.REDIS_PORT,
+          client: redisClient,
+          ttl: Config.REDIS_TTL,
+        }),
+      })
+    );
 
     // Middleware to parse requests with JSON content
     this.app.use(bodyParser.json());

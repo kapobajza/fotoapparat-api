@@ -4,10 +4,10 @@ import { IModel } from '../db';
 import { validationMessages } from '../lib/validator';
 
 export interface AuthModelType {
-  id: number;
-  userId: number;
-  refreshToken: string;
-  expiresAt: number;
+  id?: number;
+  userId?: number;
+  refreshToken?: string;
+  expiresAt?: number;
 }
 
 const CODE_FIELD = 'code';

@@ -19,6 +19,10 @@ export interface ConfigType {
   TOKEN_SECRET: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
+  REDIS_HOST: string;
+  REDIS_PORT: number;
+  REDIS_TTL: number;
+  SESSION_SECRET: string;
 }
 
 const Config: ConfigType = {
@@ -36,6 +40,10 @@ const Config: ConfigType = {
   TOKEN_SECRET: env.TOKEN_SECRET ?? 'secret123',
   GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID ?? '',
   GOOGLE_CLIENT_SECRET: env.GOOGLE_CLIENT_SECRET ?? '',
+  REDIS_HOST: env.REDIS_HOST ?? 'localhost',
+  REDIS_PORT: parseInt(env.REDIS_PORT ?? '', 10) ?? 6379,
+  REDIS_TTL: parseInt(env.REDIS_TTL ?? '', 10) ?? 260,
+  SESSION_SECRET: env.SESSION_SECRET ?? 'session_secret123',
 };
 
 export default Config;
