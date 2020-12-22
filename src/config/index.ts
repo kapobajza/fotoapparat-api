@@ -23,6 +23,7 @@ export interface ConfigType {
   REDIS_PORT: number;
   REDIS_TTL: number;
   SESSION_SECRET: string;
+  LOG_DB_QUERIES: boolean;
 }
 
 const Config: ConfigType = {
@@ -44,6 +45,7 @@ const Config: ConfigType = {
   REDIS_PORT: parseInt(env.REDIS_PORT ?? '', 10) ?? 6379,
   REDIS_TTL: parseInt(env.REDIS_TTL ?? '', 10) ?? 260,
   SESSION_SECRET: env.SESSION_SECRET ?? 'session_secret123',
+  LOG_DB_QUERIES: !!env.LOG_DB_QUERIES,
 };
 
 export default Config;

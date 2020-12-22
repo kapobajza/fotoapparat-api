@@ -11,6 +11,7 @@ export interface AuthModelType {
 }
 
 const CODE_FIELD = 'code';
+const REFRESH_TOKEN_FIELD = 'refreshToken';
 
 export class AuthModel implements IModel {
   getFields() {
@@ -39,6 +40,24 @@ export class AuthModel implements IModel {
         },
         isString: {
           errorMessage: validationMessages.isType(CODE_FIELD, 'string'),
+        },
+      },
+    };
+  }
+
+  static getRefreshTokenValidators(): Schema {
+    return {
+      refreshToken: {
+        in: 'body',
+        exists: {
+          errorMessage: validationMessages.required(REFRESH_TOKEN_FIELD),
+          options: {
+            checkFalsy: true,
+            checkNull: true,
+          },
+        },
+        isString: {
+          errorMessage: validationMessages.isType(REFRESH_TOKEN_FIELD, 'string'),
         },
       },
     };

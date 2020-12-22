@@ -1,15 +1,13 @@
-import { MySqlStore } from '../db';
-import { UserModel, UserModelType } from '../models/user';
+import { BaseRepository } from '../db';
+import { UserModel, UserModelType } from '../models';
 
-class UserRepository {
-  async getByEmail(email: string) {
-    return MySqlStore.findOne<UserModelType>(UserModel, 'SELECT * FROM users WHERE email = ?', [
-      email,
-    ]);
+class UserRepository extends BaseRepository<UserModelType> {
+  async getByEmail(email: string, fields?: string[]) {
+    return this.findOne(UserModel, 'WHERE email = ?', [email]);
   }
 
   async add(user: UserModelType) {
-    return MySqlStore.insert<UserModelType>(UserModel, user);
+    return this.insert(UserModel, user);
   }
 }
 

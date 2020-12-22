@@ -1,15 +1,13 @@
-import { MySqlStore } from '../db';
-import { AuthModel, AuthModelType } from '../models/auth';
+import { BaseRepository } from '../db';
+import { AuthModel, AuthModelType } from '../models';
 
-class AuthRepository {
+class AuthRepository extends BaseRepository<AuthModelType> {
   async add(data: AuthModelType) {
-    return MySqlStore.insert<AuthModelType>(AuthModel, data);
+    return this.insert(AuthModel, data);
   }
 
   async getByUserId(id: number) {
-    return MySqlStore.findOne<AuthModelType>(AuthModel, 'SELECT * FROM auth WHERE user_id = ?', [
-      id,
-    ]);
+    return this.findOne(AuthModel, 'WHERE user_id = ?', [id]);
   }
 }
 

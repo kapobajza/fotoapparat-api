@@ -1,4 +1,5 @@
 import mysql, { Pool } from 'mysql';
+import moment from 'moment';
 
 import IModel, { ModelFieldType } from './model-interface';
 import Config from '../Config';
@@ -59,11 +60,7 @@ class MySqlStore {
     }, {});
   }
 
-  private async select<T>(
-    ModelType: { new (): IModel },
-    statements: string,
-    values?: any[]
-  ): Promise<T[]> {
+  private executeQuery(statements: string, values?: any[]): Promise<any> {
     const that = this;
 
     return new Promise((resolve, reject) => {
@@ -74,25 +71,39 @@ class MySqlStore {
           connection.query(statements, values, (err, results) => {
             connection.release();
 
+            if (Config.LOG_DB_QUERIES && Config.IS_DEV_ENV) {
+              console.log(
+                `${statements} ${values ? `{ ${values.join(', ')} }` : ''} - ${moment().format(
+                  'DD.MM.YYYY HH:mm:ss'
+                )}`
+              );
+            }
+
             if (err) {
               reject(err);
             } else {
-              try {
-                const finalResult = results.map((res: { [key: string]: any }) => {
-                  const model = new ModelType();
-                  const fields = model.getFields();
-                  return this.mapFields(res, fields);
-                });
-
-                resolve(finalResult);
-              } catch (err) {
-                reject(err);
-              }
+              resolve(results);
             }
           });
         }
       });
     });
+  }
+
+  private async select<T>(
+    ModelType: { new (): IModel },
+    statements: string,
+    values?: any[]
+  ): Promise<T[]> {
+    const results = await this.executeQuery(statements, values);
+
+    const finalResult = results.map((res: { [key: string]: any }) => {
+      const model = new ModelType();
+      const fields = model.getFields();
+      return this.mapFields(res, fields);
+    });
+
+    return finalResult;
   }
 
   async findOne<T>(ModelType: { new (): IModel }, statements: string, values?: any[]): Promise<T> {
@@ -117,34 +128,14 @@ class MySqlStore {
       ', '
     )}) VALUES (${dbDataValues.reduce((p, n) => (p += `${p ? ', ' : ''}'${n}'`), '')});`;
 
-    const that = this;
+    const results = await this.executeQuery(sqlQuery);
 
-    return new Promise((resolve, reject) => {
-      that.connection.getConnection((err, connection) => {
-        if (err) {
-          reject(err);
-        } else {
-          connection.query(sqlQuery, (err, results) => {
-            connection.release();
+    const returnedData: any = {
+      ...data,
+      id: results?.insertId,
+    };
 
-            if (err) {
-              reject(err);
-            } else {
-              try {
-                const returnedData: any = {
-                  ...data,
-                  id: results?.insertId,
-                };
-
-                resolve(returnedData);
-              } catch (err) {
-                reject(err);
-              }
-            }
-          });
-        }
-      });
-    });
+    return returnedData;
   }
 }
 

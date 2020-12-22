@@ -14,6 +14,30 @@ export class HttpError extends Error {
   }
 }
 
+export class HttpUnauthorizedError extends Error {
+  message: string;
+  statusCode: number;
+
+  constructor(message: string) {
+    super(message ?? Config.DEFAULT_MESSAGE);
+
+    this.message = message;
+    this.statusCode = 401;
+  }
+}
+
+export class HttpForbiddenError extends Error {
+  message: string;
+  statusCode: number;
+
+  constructor(message: string) {
+    super(message ?? Config.DEFAULT_MESSAGE);
+
+    this.message = message;
+    this.statusCode = 403;
+  }
+}
+
 export const handleHttpError = (res: Response, error: HttpError) => {
   const { message, statusCode, stack } = error;
 
