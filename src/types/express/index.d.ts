@@ -1,8 +1,8 @@
 /* eslint-disable no-unused-vars */
-import session from 'express-session';
+import { Express } from 'express';
 
-declare module 'express-session' {
-  export interface SessionData {
+declare module 'express-serve-static-core' {
+  export interface Request {
     email: string;
     userId: number;
     googleAccessToken: string | null | undefined;

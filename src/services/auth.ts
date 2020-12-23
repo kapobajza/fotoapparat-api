@@ -49,7 +49,7 @@ class AuthService {
     }
 
     // Generate a new, signed token
-    const token = jwt.sign({ id: userId });
+    const token = jwt.sign({ id: userId, email, googleAccessToken: access_token ?? '' });
 
     return {
       token,
@@ -89,7 +89,12 @@ class AuthService {
     });
   }
 
-  async refreshToken(token: string, userId: number): Promise<RefreshTokenResponse> {
+  async refreshToken(
+    token: string,
+    userId: number,
+    email: string,
+    googleAccessToken: string
+  ): Promise<RefreshTokenResponse> {
     const { refreshToken, expiresAt } = await this.getByUserId(userId);
 
     // If the refresh token doesn't match, return 401
@@ -109,7 +114,7 @@ class AuthService {
     }
 
     // Generate a new, refreshed token
-    const authToken = jwt.sign({ id: userId });
+    const authToken = jwt.sign({ id: userId, email, googleAccessToken });
 
     return {
       token: authToken,

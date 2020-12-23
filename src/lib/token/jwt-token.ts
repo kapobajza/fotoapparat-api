@@ -20,10 +20,13 @@ export interface TokenType {
   exp: number;
   id: number;
   google_auth_token: string;
+  googleAccessToken: string;
 }
 
 export interface TokenPayloadType {
   id: number;
+  email: string;
+  googleAccessToken: string;
 }
 
 export function decode(
