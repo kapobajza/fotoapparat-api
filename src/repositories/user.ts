@@ -1,9 +1,9 @@
-import { BaseRepository } from '../db';
+import { BaseRepository, QueryOptions } from '../db';
 import { UserModel, UserModelType } from '../models';
 
 class UserRepository extends BaseRepository<UserModelType> {
-  async getByEmail(email: string, fields?: string[]) {
-    return this.findOne(UserModel, 'WHERE email = ?', [email]);
+  async getByEmail(email: string, options?: QueryOptions) {
+    return this.findOne(UserModel, 'WHERE email = ?', [email], options);
   }
 
   async add(user: UserModelType) {

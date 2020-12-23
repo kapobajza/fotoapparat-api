@@ -13,11 +13,19 @@ interface RefreshTokenResponse {
 }
 
 class AuthService {
+  private async generateNewRefreshToken() {
+    const expiresAt = moment().add(2, 'months').unix();
+    const refreshToken = await generateRefreshToken();
+
+    return { expiresAt, refreshToken };
+  }
+
   async googleAuth(code: string) {
     const {
       tokens: { id_token, access_token },
     } = await GoogleService.getTokens(code);
 
+    // Decode the id_token and get the required data from it
     const { email, given_name, family_name } = jwt.decode(id_token);
     const user = await UserService.getOrAddUser({
       email,
@@ -26,8 +34,21 @@ class AuthService {
     });
 
     const userId = user?.id ?? 0;
-    const { refreshToken } = await this.getOrAddAuth({ userId });
+    let { auth, hasAddedNewData } = await this.getOrAddAuth({ userId });
 
+    // If an auth record already exists, generate a new refresh token for it
+    if (!hasAddedNewData) {
+      const { refreshToken, expiresAt } = await this.generateNewRefreshToken();
+      await this.updateByUserId(userId ?? 0, { refreshToken, expiresAt });
+
+      auth = {
+        ...auth,
+        refreshToken,
+        expiresAt,
+      };
+    }
+
+    // Generate a new, signed token
     const token = jwt.sign({ id: userId });
 
     return {
@@ -35,35 +56,43 @@ class AuthService {
       userId,
       email,
       googleAccessToken: access_token,
-      refreshToken,
+      refreshToken: auth?.refreshToken,
     };
   }
 
+  // Create a new auth record, or return an existing one
   async getOrAddAuth(data: AuthModelType) {
     const { userId } = data;
     let auth = await this.getByUserId(userId ?? 0);
+    let hasAddedNewData = false;
 
     if (!auth) {
       auth = await this.add(userId ?? 0);
+      hasAddedNewData = true;
     }
 
-    return auth;
+    return { auth, hasAddedNewData };
   }
 
   async add(userId: number) {
-    const expiresAt = moment().add(2, 'months').unix();
-    const refreshToken = await generateRefreshToken();
-
+    const { expiresAt, refreshToken } = await this.generateNewRefreshToken();
     return AuthRepository.add({ userId, expiresAt, refreshToken });
   }
 
+  async updateByUserId(userId: number, data: AuthModelType) {
+    return AuthRepository.updateByUserId(userId, data);
+  }
+
   async getByUserId(id: number) {
-    return AuthRepository.getByUserId(id);
+    return AuthRepository.getByUserId(id, {
+      fields: ['id', 'expires_at', 'refresh_token', 'user_id'],
+    });
   }
 
   async refreshToken(token: string, userId: number): Promise<RefreshTokenResponse> {
     const { refreshToken, expiresAt } = await this.getByUserId(userId);
 
+    // If the refresh token doesn't match, return 401
     if (refreshToken !== token) {
       return {
         token: null,
@@ -71,6 +100,7 @@ class AuthService {
       };
     }
 
+    // If the refresh token has expired, return 401
     if (moment().unix() > (expiresAt ?? 0)) {
       return {
         token: null,
@@ -78,6 +108,7 @@ class AuthService {
       };
     }
 
+    // Generate a new, refreshed token
     const authToken = jwt.sign({ id: userId });
 
     return {

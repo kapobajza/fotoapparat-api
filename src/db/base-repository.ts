@@ -2,8 +2,8 @@ import MySqlStore from './mysql';
 import IModel, { ModelFieldType } from './model-interface';
 
 export interface QueryOptions {
-  fields: string[];
-  limit: number;
+  fields?: string[];
+  limit?: number;
 }
 
 export type FieldMappingType = 'to_db_field' | 'to_object_field';
@@ -119,5 +119,25 @@ export default class BaseRepository<T> {
     };
 
     return returnedData;
+  }
+
+  async set(
+    ModelType: { new (): IModel },
+    newData: { [key: string]: any },
+    extra?: string,
+    values?: any[]
+  ): Promise<T> {
+    const model = new ModelType();
+    const fields = model.getFields();
+    const mappedDbData = this.mapFields(newData, fields, 'to_db_field');
+    delete mappedDbData.id;
+
+    const dbSetQuery = Object.keys(mappedDbData).map((key) => `${key} = '${mappedDbData[key]}'`);
+
+    const sqlQuery = `UPDATE ${model.getName()} SET ${dbSetQuery.join(', ')} ${extra}`;
+
+    await MySqlStore.executeQuery(sqlQuery, values);
+
+    return newData as T;
   }
 }

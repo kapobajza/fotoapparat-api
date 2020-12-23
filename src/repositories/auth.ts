@@ -1,4 +1,4 @@
-import { BaseRepository } from '../db';
+import { BaseRepository, QueryOptions } from '../db';
 import { AuthModel, AuthModelType } from '../models';
 
 class AuthRepository extends BaseRepository<AuthModelType> {
@@ -6,8 +6,12 @@ class AuthRepository extends BaseRepository<AuthModelType> {
     return this.insert(AuthModel, data);
   }
 
-  async getByUserId(id: number) {
-    return this.findOne(AuthModel, 'WHERE user_id = ?', [id]);
+  async getByUserId(id: number, options?: QueryOptions) {
+    return this.findOne(AuthModel, 'WHERE user_id = ?', [id], options);
+  }
+
+  async updateByUserId(userId: number, data: AuthModelType) {
+    return this.set(AuthModel, data, 'WHERE user_id = ?', [userId]);
   }
 }
 
