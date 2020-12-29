@@ -1,7 +1,7 @@
 import mysql, { Pool } from 'mysql';
 import moment from 'moment';
 
-import Config from '../Config';
+import Config from '../config';
 
 class MySqlStore {
   connection: Pool;
