@@ -6,7 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --project ./",
-    "start:dev": "NODE_ENV=development nodemon index.ts"
+    "start:dev": "NODE_ENV=development nodemon index.ts",
+    "start": "node build/index.js",
+    "postinstall": "tsc",
+    "watch-node": "nodemon build/index.js",
+    "watch-ts": "tsc -w"
   },
   "author": "kapo",
   "license": "ISC",
@@ -48,5 +52,8 @@
     "morgan": "^1.10.0",
     "ts-node": "^9.1.0",
     "typescript": "^4.1.2"
+  },
+  "engines": {
+    "node": "12.15.0"
   }
 }
